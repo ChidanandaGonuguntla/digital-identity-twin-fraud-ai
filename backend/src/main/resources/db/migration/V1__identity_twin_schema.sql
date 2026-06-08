@@ -168,3 +168,40 @@ CREATE TABLE audit_log (
 );
 
 CREATE INDEX idx_audit_entity ON audit_log (entity_type, entity_id);
+
+CREATE TABLE IF NOT EXISTS identity_twin.fraud_step_up_challenge (
+                                                                     challenge_id UUID PRIMARY KEY,
+                                                                     fraud_event_id UUID NOT NULL,
+                                                                     customer_id VARCHAR(100) NOT NULL,
+    account_id VARCHAR(100),
+    transaction_id VARCHAR(100),
+
+    challenge_type VARCHAR(60) NOT NULL,
+    challenge_status VARCHAR(40) NOT NULL,
+
+    delivery_channel VARCHAR(60) NOT NULL,
+    destination_label VARCHAR(150),
+
+    reason_code VARCHAR(100),
+    reason_description VARCHAR(500),
+
+    rule_score NUMERIC(6,2),
+    ml_score NUMERIC(6,2),
+    final_risk_score NUMERIC(6,2),
+
+    approval_token_hash VARCHAR(255),
+    expires_at TIMESTAMPTZ NOT NULL,
+    approved_at TIMESTAMPTZ,
+    denied_at TIMESTAMPTZ,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+CREATE INDEX IF NOT EXISTS idx_step_up_challenge_event
+    ON identity_twin.fraud_step_up_challenge(fraud_event_id);
+
+CREATE INDEX IF NOT EXISTS idx_step_up_challenge_customer
+    ON identity_twin.fraud_step_up_challenge(customer_id);
+
+CREATE INDEX IF NOT EXISTS idx_step_up_challenge_status
+    ON identity_twin.fraud_step_up_challenge(challenge_status);

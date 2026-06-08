@@ -1,25 +1,33 @@
 package com.citizens.dti.api;
 
+import com.citizens.dti.dto.FraudEvaluationRequest;
+import com.citizens.dti.dto.FraudEvaluationResponse;
 import com.citizens.dti.model.RiskAssessment;
 import com.citizens.dti.model.TransactionEvent;
 import com.citizens.dti.service.FraudDetectionService;
+import com.citizens.dti.service.FraudEvolutionService;
 import jakarta.validation.Valid;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/transactions")
 public class FraudController {
 
   private final FraudDetectionService fraudDetectionService;
 
-  public FraudController(FraudDetectionService fraudDetectionService) {
-    this.fraudDetectionService = fraudDetectionService;
+  private final FraudEvolutionService fraudEvaluationService;
+
+  @PostMapping("/evaluate")
+  public ResponseEntity<FraudEvaluationResponse> evaluate(
+      @Valid @RequestBody FraudEvaluationRequest request) {
+    return ResponseEntity.ok(fraudEvaluationService.evaluate(request));
   }
 
   /** Score a single live transaction against the customer's identity twin. */
