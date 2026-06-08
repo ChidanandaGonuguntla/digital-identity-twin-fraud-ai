@@ -29,12 +29,16 @@ public class IdentityTwinRepository {
         this.mapper = mapper;
     }
 
-    @Transactional(readOnly = true)
-    public IdentityTwin findOrCreate(String customerId) {
-        return jpa.findById(customerId)
-                .map(mapper::toDomain)
-                .orElseGet(() -> new IdentityTwin(customerId));
-    }
+  @Transactional
+  public IdentityTwin findOrCreate(String customerId) {
+    return jpa.findById(customerId)
+            .map(mapper::toDomain)
+            .orElseGet(() -> {
+              IdentityTwin twin = new IdentityTwin(customerId);
+              jpa.save(mapper.toEntity(twin));
+              return twin;
+            });
+  }
 
     @Transactional(readOnly = true)
     public Optional<IdentityTwin> find(String customerId) {

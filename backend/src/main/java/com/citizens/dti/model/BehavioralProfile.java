@@ -45,7 +45,10 @@ public class BehavioralProfile {
 
     double mean = amountMean();
     double variance = (amountSumOfSquares / transactionCount) - (mean * mean);
-    return variance <= 0 ? 0.0 : Math.sqrt(variance);
+    if (variance <= 0 || Double.isNaN(variance) || Double.isInfinite(variance)) {
+      return 0.0;
+    }
+    return Math.sqrt(variance);
   }
 
   public boolean isKnownDevice(String deviceId) {
