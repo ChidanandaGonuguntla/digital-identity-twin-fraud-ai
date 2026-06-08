@@ -5,8 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record FeedbackRequest(
-        @NotBlank String eventId,
-        @NotBlank String customerId,
-        @NotNull FeedbackOutcome outcome,
-        String comments
-) {}
+    @NotBlank String eventId,
+    @NotBlank String customerId,
+    @NotNull FeedbackOutcome outcome,
+    String comments) {}

@@ -12,10 +12,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequestMapping("/api/v1/events")
 @RequiredArgsConstructor
 public class EventStreamController {
-    private final SseEventService sseEventService;
+  private final SseEventService sseEventService;
 
-    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter stream() {
-        return sseEventService.subscribe();
-    }
+  @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  public SseEmitter stream() {
+    return sseEventService.subscribe();
+  }
 }

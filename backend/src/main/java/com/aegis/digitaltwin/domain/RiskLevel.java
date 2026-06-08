@@ -1,8 +1,8 @@
 package com.aegis.digitaltwin.domain;
 
 public enum RiskLevel {
-    LOW,
-    MEDIUM,
-    HIGH,
-    CRITICAL
+  LOW,
+  MEDIUM,
+  HIGH,
+  CRITICAL
 }

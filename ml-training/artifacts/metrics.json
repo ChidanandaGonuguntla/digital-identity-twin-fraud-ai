@@ -1,0 +1,69 @@
+{
+  "test_auc_pr": 0.9722298448433425,
+  "test_roc_auc": 0.9941859214956781,
+  "recall_at_1pct_fpr": 0.9781659388646288,
+  "recall_at_0p1pct_fpr": 0.9519650655021834,
+  "test_fraud_rate": 0.0076125257629146995,
+  "best_iteration": 159,
+  "n_train": 140381,
+  "n_test": 30082,
+  "operating_threshold": 0.005552054859824337,
+  "shap_global_importance": [
+    {
+      "feature": "cust_txn_seq",
+      "mean_abs_shap": 0.58967
+    },
+    {
+      "feature": "hour",
+      "mean_abs_shap": 0.3778
+    },
+    {
+      "feature": "is_new_category",
+      "mean_abs_shap": 0.37746
+    },
+    {
+      "feature": "day_of_week",
+      "mean_abs_shap": 0.37274
+    },
+    {
+      "feature": "geo_velocity_kmh",
+      "mean_abs_shap": 0.37216
+    },
+    {
+      "feature": "secs_since_prev",
+      "mean_abs_shap": 0.31814
+    },
+    {
+      "feature": "is_new_device",
+      "mean_abs_shap": 0.24024
+    },
+    {
+      "feature": "amt_zscore_personal",
+      "mean_abs_shap": 0.21962
+    },
+    {
+      "feature": "amt_sum_24h",
+      "mean_abs_shap": 0.21958
+    },
+    {
+      "feature": "amt_to_prior_max",
+      "mean_abs_shap": 0.20911
+    },
+    {
+      "feature": "amt",
+      "mean_abs_shap": 0.19994
+    },
+    {
+      "feature": "amt_log",
+      "mean_abs_shap": 0.03462
+    },
+    {
+      "feature": "txn_count_24h",
+      "mean_abs_shap": 0.01215
+    },
+    {
+      "feature": "txn_count_1h",
+      "mean_abs_shap": 0.00443
+    }
+  ]
+}

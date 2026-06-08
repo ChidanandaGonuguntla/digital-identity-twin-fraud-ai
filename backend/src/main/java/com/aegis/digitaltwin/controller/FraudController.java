@@ -9,31 +9,30 @@ import com.aegis.digitaltwin.repository.CustomerEventRepository;
 import com.aegis.digitaltwin.service.FeedbackLearningService;
 import com.aegis.digitaltwin.service.FraudDecisionService;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/fraud")
 @RequiredArgsConstructor
 public class FraudController {
-    private final FraudDecisionService fraudDecisionService;
-    private final FeedbackLearningService feedbackLearningService;
-    private final CustomerEventRepository eventRepository;
+  private final FraudDecisionService fraudDecisionService;
+  private final FeedbackLearningService feedbackLearningService;
+  private final CustomerEventRepository eventRepository;
 
-    @PostMapping("/evaluate")
-    public FraudDecisionResponse evaluate(@Valid @RequestBody ActivityEventRequest request) {
-        return fraudDecisionService.evaluate(request);
-    }
+  @PostMapping("/evaluate")
+  public FraudDecisionResponse evaluate(@Valid @RequestBody ActivityEventRequest request) {
+    return fraudDecisionService.evaluate(request);
+  }
 
-    @PostMapping("/feedback")
-    public CustomerTwin feedback(@Valid @RequestBody FeedbackRequest request) {
-        return feedbackLearningService.applyFeedback(request);
-    }
+  @PostMapping("/feedback")
+  public CustomerTwin feedback(@Valid @RequestBody FeedbackRequest request) {
+    return feedbackLearningService.applyFeedback(request);
+  }
 
-    @GetMapping("/events/recent")
-    public List<CustomerEvent> recentEvents() {
-        return eventRepository.findTop20ByOrderByCreatedAtDesc();
-    }
+  @GetMapping("/events/recent")
+  public List<CustomerEvent> recentEvents() {
+    return eventRepository.findTop20ByOrderByCreatedAtDesc();
+  }
 }
