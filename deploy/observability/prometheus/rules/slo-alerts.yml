@@ -1,0 +1,112 @@
+groups:
+  - name: fraud_slo_alerts
+    rules:
+      - alert: FraudDecisionLatencyP95SLOViolation
+        expr: slo:fraud_decision_latency_p95:5m > 300
+        for: 5m
+        labels:
+          severity: warning
+          slo: decision_latency_p95
+          team: fraud-platform
+        annotations:
+          summary: Fraud decision p95 latency exceeded 300ms SLO
+          description: p95 latency is {{ $value | printf "%.0f" }}ms for 5 minutes (target 300ms).
+
+      - alert: FraudDecisionLatencyP99SLOViolation
+        expr: slo:fraud_decision_latency_p99:5m > 750
+        for: 5m
+        labels:
+          severity: critical
+          slo: decision_latency_p99
+          team: fraud-platform
+        annotations:
+          summary: Fraud decision p99 latency exceeded 750ms SLO
+          description: p99 latency is {{ $value | printf "%.0f" }}ms for 5 minutes (target 750ms).
+
+      - alert: FraudApiAvailabilitySLOViolation
+        expr: slo:fraud_api_availability:5m < 0.999
+        for: 5m
+        labels:
+          severity: critical
+          slo: api_availability
+          team: fraud-platform
+        annotations:
+          summary: Fraud API availability below 99.9% SLO
+          description: Availability is {{ $value | humanizePercentage }} over the last 5 minutes.
+
+      - alert: FraudServiceDown
+        expr: slo:fraud_service_up:1m == 0
+        for: 2m
+        labels:
+          severity: critical
+          slo: service_up
+          team: fraud-platform
+        annotations:
+          summary: Fraud backend is down
+          description: Prometheus cannot scrape the fraud backend actuator endpoint.
+
+      - alert: KafkaConsumerLagSLOViolation
+        expr: slo:fraud_kafka_lag:1m > 1000
+        for: 10m
+        labels:
+          severity: warning
+          slo: kafka_consumer_lag
+          team: fraud-platform
+        annotations:
+          summary: Kafka consumer lag exceeded 1000 messages
+          description: Transaction topic lag is {{ $value | printf "%.0f" }} messages.
+
+      - alert: KafkaConsumerLagCritical
+        expr: slo:fraud_kafka_lag:1m > 5000
+        for: 5m
+        labels:
+          severity: critical
+          slo: kafka_consumer_lag
+          team: fraud-platform
+        annotations:
+          summary: Kafka consumer lag critically high
+          description: Transaction topic lag is {{ $value | printf "%.0f" }} messages.
+
+      - alert: ModelDriftSLOViolation
+        expr: slo:fraud_model_drift:1m > 0.35
+        for: 15m
+        labels:
+          severity: warning
+          slo: model_drift
+          team: model-risk
+        annotations:
+          summary: Model drift score exceeded 0.35 threshold
+          description: Model drift is {{ $value | printf "%.3f" }}. Model risk review required.
+
+      - alert: ModelDriftAlertActive
+        expr: slo:fraud_model_drift_alert:1m == 1
+        for: 15m
+        labels:
+          severity: warning
+          slo: model_drift_alert
+          team: model-risk
+        annotations:
+          summary: Model drift alert flag is active
+          description: Drift alert has been active for 15 minutes. MTTR clock started.
+
+      - alert: FraudBlockRateAnomaly
+        expr: slo:fraud_block_rate:5m > 0.25
+        for: 10m
+        labels:
+          severity: warning
+          slo: block_rate
+          team: fraud-ops
+        annotations:
+          summary: Block rate exceeded 25%
+          description: Block rate is {{ $value | humanizePercentage }} over 5 minutes.
+
+      - alert: FraudAuditWriteFailures
+        expr: increase(audit_write_failure_count[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          slo: audit_integrity
+          team: fraud-platform
+        annotations:
+          summary: Fraud audit write failures detected
+          description: Audit persistence failures occurred in the last 5 minutes.

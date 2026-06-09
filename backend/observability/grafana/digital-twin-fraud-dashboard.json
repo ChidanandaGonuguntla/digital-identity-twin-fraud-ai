@@ -1,0 +1,129 @@
+{
+  "title": "Digital Twin Fraud",
+  "uid": "dti-fraud-ops",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Decisions / min",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "rate(fraud_decisions_total[1m])"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Blocked total",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "fraud_decisions_blocked_total"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Challenged total",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "fraud_decisions_challenged_total"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Step-up pending",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "step_up_challenge_pending_count"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Decision latency p95",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(fraud_decision_latency_ms_bucket[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Kafka consumer lag",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "targets": [
+        {
+          "expr": "kafka_consumer_lag"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Model score distribution",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "targets": [
+        {
+          "expr": "rate(fraud_model_score_distribution_sum[5m]) / rate(fraud_model_score_distribution_count[5m])"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Twin drift score",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "targets": [
+        {
+          "expr": "fraud_twin_drift_score"
+        }
+      ]
+    }
+  ]
+}

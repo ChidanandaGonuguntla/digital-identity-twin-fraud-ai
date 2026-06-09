@@ -1,0 +1,77 @@
+{
+  "uid": "dti-fraud-slos",
+  "title": "Fraud Platform SLOs",
+  "tags": ["digital-twin", "fraud", "slo", "sre"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1m",
+  "time": { "from": "now-24h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Latency SLO (p95 < 300ms)",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "slo:fraud_decision_latency_p95:5m <= 300", "legendFormat": "met" }],
+      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "BREACH" }, "1": { "text": "MET" } } }] } }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Availability SLO (>= 99.9%)",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "slo:fraud_api_availability:5m >= 0.999", "legendFormat": "met" }],
+      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "BREACH" }, "1": { "text": "MET" } } }] } }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Kafka lag SLO (< 1000)",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "kafka_consumer_lag < 1000", "legendFormat": "met" }],
+      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "BREACH" }, "1": { "text": "MET" } } }] } }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Model drift SLO (< 0.35)",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "fraud_model_drift_score < 0.35", "legendFormat": "met" }],
+      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "BREACH" }, "1": { "text": "MET" } } }] } }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Error budget burn (fraud API)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "slo:fraud_error_budget_burn:5m", "legendFormat": "burn rate" }],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 4 } }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "SLO latency trend with targets",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "slo:fraud_decision_latency_p95:5m", "legendFormat": "p95" },
+        { "expr": "slo:fraud_decision_latency_p99:5m", "legendFormat": "p99" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 7,
+      "type": "table",
+      "title": "Active SLO alerts",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "ALERTS{team=~\"fraud-platform|model-risk\"}", "format": "table", "instant": true }]
+    }
+  ]
+}

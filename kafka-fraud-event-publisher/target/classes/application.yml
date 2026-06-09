@@ -1,0 +1,28 @@
+server:
+  port: 9998
+
+publisher:
+  topic: ${DTI_TRANSACTION_TOPIC:dti.transaction-events}
+  dataset-path: ${DTI_DATASET_PATH:data/fraud-events-100k.jsonl}
+  publish-rate-per-second: ${DTI_PUBLISH_RATE:500}
+  max-records: ${DTI_MAX_RECORDS:0} # 0 means all records
+  publish-on-startup: ${DTI_PUBLISH_ON_STARTUP:true}
+
+spring:
+  application:
+    name: kafka-fraud-event-publisher
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      acks: all
+      retries: 5
+      batch-size: 32768
+      buffer-memory: 67108864
+      compression-type: lz4
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        linger.ms: 20
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        spring.json.add.type.headers: false

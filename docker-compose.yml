@@ -1,0 +1,221 @@
+name: digital-twin-fraud-platform
+
+x-backend-env: &backend-env
+  SERVER_PORT: "8080"
+  SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/digital_twin_db?currentSchema=identity_twin}
+  SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
+  SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-admin}
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+  APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost}
+  APP_SECURITY_ENABLED: ${APP_SECURITY_ENABLED:-true}
+  APP_JWT_SECRET: ${APP_JWT_SECRET:-local-dev-secret-change-in-production-min-32-chars}
+  APP_REDIS_ENABLED: ${APP_REDIS_ENABLED:-true}
+  APP_REDIS_HOST: ${APP_REDIS_HOST:-valkey}
+  APP_REDIS_PORT: ${APP_REDIS_PORT:-6379}
+  IDENTITY_PROVIDER: ${IDENTITY_PROVIDER:-local}
+  IDENTITY_ISSUER_URI: ${IDENTITY_ISSUER_URI:-}
+  IDENTITY_AUDIENCE: ${IDENTITY_AUDIENCE:-}
+  IDENTITY_JWKS_URI: ${IDENTITY_JWKS_URI:-}
+  FRAUD_KAFKA_ENABLED: ${FRAUD_KAFKA_ENABLED:-true}
+  OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318/v1/traces}
+  OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:-http://otel-collector:4318/v1/metrics}
+  OTEL_METRICS_EXPORT_ENABLED: ${OTEL_METRICS_EXPORT_ENABLED:-false}
+  OTEL_TRACES_SAMPLER_PROBABILITY: ${OTEL_TRACES_SAMPLER_PROBABILITY:-0.0}
+  DTI_ML_PROVIDER: ${DTI_ML_PROVIDER:-onnx}
+
+services:
+  postgres:
+    profiles: ["local-infra"]
+    image: postgres:16-alpine
+    container_name: dti-postgres
+    environment:
+      POSTGRES_DB: digital_twin_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - dti_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d digital_twin_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  kafka:
+    profiles: ["local-infra"]
+    image: apache/kafka:3.8.0
+    container_name: dti-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+
+  valkey:
+    profiles: ["local-infra"]
+    image: valkey/valkey:8.0-alpine
+    container_name: dti-valkey
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    image: ${BACKEND_IMAGE:-digital-twin-fraud-backend:local}
+    container_name: dti-fraud-backend
+    environment:
+      <<: *backend-env
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+      kafka:
+        condition: service_healthy
+        required: false
+      valkey:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/actuator/health/readiness || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: /api/v1
+        VITE_WS_URL: /ws/decisions
+        VITE_SECURITY_ENABLED: "true"
+    image: ${FRONTEND_IMAGE:-digital-twin-fraud-frontend:local}
+    container_name: dti-fraud-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  otel-collector:
+    profiles: ["monitoring"]
+    image: otel/opentelemetry-collector-contrib:0.115.1
+    container_name: dti-otel-collector
+    command: ["--config=/etc/otel-collector.yml"]
+    volumes:
+      - ./deploy/observability/otel-collector/otel-collector.yml:/etc/otel-collector.yml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8889:8889"
+    depends_on:
+      - tempo
+    restart: unless-stopped
+
+  tempo:
+    profiles: ["monitoring"]
+    image: grafana/tempo:2.6.1
+    container_name: dti-tempo
+    command: ["-config.file=/etc/tempo.yml"]
+    volumes:
+      - ./deploy/observability/tempo/tempo.yml:/etc/tempo.yml:ro
+      - dti_tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+    restart: unless-stopped
+
+  prometheus:
+    profiles: ["monitoring"]
+    image: prom/prometheus:v2.55.1
+    container_name: dti-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    volumes:
+      - ./deploy/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploy/observability/prometheus/rules:/etc/prometheus/rules:ro
+      - dti_prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - backend
+      - alertmanager
+    restart: unless-stopped
+
+  alertmanager:
+    profiles: ["monitoring"]
+    image: prom/alertmanager:v0.27.0
+    container_name: dti-alertmanager
+    volumes:
+      - ./deploy/observability/prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    ports:
+      - "9093:9093"
+    restart: unless-stopped
+
+  grafana:
+    profiles: ["monitoring"]
+    image: grafana/grafana:11.3.0
+    container_name: dti-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./deploy/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - dti_grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - tempo
+    restart: unless-stopped
+
+  keycloak:
+    profiles: ["identity"]
+    image: quay.io/keycloak/keycloak:26.0.5
+    container_name: dti-keycloak
+    command: start-dev
+    environment:
+      KC_HTTP_PORT: 8081
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+
+volumes:
+  dti_pgdata:
+  dti_prometheus_data:
+  dti_grafana_data:
+  dti_tempo_data:

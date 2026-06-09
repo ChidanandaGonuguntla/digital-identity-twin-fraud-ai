@@ -1,0 +1,177 @@
+nameOverride: ""
+fullnameOverride: ""
+
+global:
+  imagePullSecrets: []
+  labels:
+    app.kubernetes.io/part-of: digital-twin-fraud-platform
+
+backend:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ghcr.io/citizens/digital-twin-fraud-backend
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  probes:
+    readiness:
+      path: /actuator/health/readiness
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+    liveness:
+      path: /actuator/health/liveness
+      initialDelaySeconds: 60
+      periodSeconds: 20
+      timeoutSeconds: 5
+      failureThreshold: 3
+  env:
+    serverPort: "8080"
+    mlProvider: onnx
+    fraudKafkaEnabled: "true"
+    securityEnabled: "true"
+    corsAllowedOrigins: "https://fraud.example.com"
+
+frontend:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ghcr.io/citizens/digital-twin-fraud-frontend
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+  probes:
+    readiness:
+      path: /healthz
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 3
+    liveness:
+      path: /healthz
+      initialDelaySeconds: 20
+      periodSeconds: 20
+      timeoutSeconds: 3
+      failureThreshold: 3
+  build:
+    apiBaseUrl: /api/v1
+    wsUrl: /ws/decisions
+    securityEnabled: "true"
+
+postgresql:
+  host: digital-twin-db.cluster-abc123.us-east-1.rds.amazonaws.com
+  port: 5432
+  database: digital_twin_db
+  schema: identity_twin
+  username: fraud_app
+
+kafka:
+  bootstrapServers: pkc-abc123.us-east-1.aws.confluent.cloud:9092
+  securityProtocol: SASL_SSL
+  saslMechanism: PLAIN
+
+redis:
+  enabled: false
+  host: valkey
+  port: 6379
+
+identity:
+  provider: keycloak
+  issuerUri: https://auth.example.com/realms/digital-twin
+  audience: digital-twin-fraud-api
+  jwksUri: https://auth.example.com/realms/digital-twin/protocol/openid-connect/certs
+
+monitoring:
+  prometheus:
+    scrape: true
+    path: /actuator/prometheus
+  grafana:
+    dashboardUrl: https://grafana.example.com/d/digital-twin-fraud
+  otel:
+    tracesEndpoint: http://otel-collector.observability.svc:4318/v1/traces
+    metricsEndpoint: http://otel-collector.observability.svc:4318/v1/metrics
+    metricsExportEnabled: true
+    tracesSampleProbability: "0.1"
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: fraud.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+        - path: /api
+          pathType: Prefix
+          service: backend
+        - path: /ws
+          pathType: Prefix
+          service: backend
+  tls:
+    - secretName: digital-twin-fraud-tls
+      hosts:
+        - fraud.example.com
+
+secrets:
+  create: true
+  existingSecret: ""
+  datasourcePassword: change-me-in-vault
+  jwtSecret: change-me-in-vault-min-32-characters-long
+  kafkaSaslUsername: ""
+  kafkaSaslPassword: ""
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+      - ALL
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

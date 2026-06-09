@@ -1,0 +1,92 @@
+{
+  "uid": "dti-fraud-kafka-model",
+  "title": "Kafka Lag and Model Drift",
+  "tags": ["digital-twin", "fraud", "kafka", "model-risk"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Kafka consumer lag",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "kafka_consumer_lag", "legendFormat": "lag" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1000 }, { "color": "red", "value": 5000 }] } } }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Model drift score",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "fraud_model_drift_score", "legendFormat": "drift" }],
+      "fieldConfig": { "defaults": { "decimals": 3, "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.15 }, { "color": "red", "value": 0.35 }] } } }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Model drift alert",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "fraud_model_drift_alert", "legendFormat": "alert" }],
+      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "OK" }, "1": { "text": "ALERT" } } }] } }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Twin drift score",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "fraud_twin_drift_score", "legendFormat": "twin drift" }],
+      "fieldConfig": { "defaults": { "decimals": 3 } }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Kafka consumer lag trend",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "kafka_consumer_lag", "legendFormat": "lag" }]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Model drift vs alert threshold",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "fraud_model_drift_score", "legendFormat": "model drift" },
+        { "expr": "fraud_twin_drift_score", "legendFormat": "twin drift" }
+      ],
+      "fieldConfig": { "defaults": { "decimals": 3 } }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Average ML model score",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "rate(fraud_model_score_distribution_sum[5m]) / clamp_min(rate(fraud_model_score_distribution_count[5m]), 0.001)",
+          "legendFormat": "avg score"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Duplicate and audit failure signals",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "increase(fraud_duplicate_events_total[5m])", "legendFormat": "duplicates" },
+        { "expr": "increase(audit_write_failure_count[5m])", "legendFormat": "audit failures" }
+      ]
+    }
+  ]
+}

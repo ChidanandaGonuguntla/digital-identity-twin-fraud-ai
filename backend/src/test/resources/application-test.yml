@@ -1,0 +1,47 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    schemas: identity_twin
+    default-schema: identity_twin
+    baseline-on-migrate: true
+    baseline-version: 1
+dti:
+  scoring:
+    drift-threshold: 50
+    challenge-expiration-hours: 24
+  ml:
+    provider: heuristic
+    models-directory: classpath:models
+    active-version: fraud-risk-v1.0.0
+    rollback-version: fraud-risk-v0.9.0
+    drift-baseline-score: 0.15
+    drift-alert-threshold: 0.35
+fraud:
+  kafka:
+    enabled: false
+    transaction-topic: dti.transaction-events
+    decision-topic: dti.fraud-decisions
+    audit-topic: dti.fraud-audit-events
+    step-up-topic: dti.step-up-challenges
+    twin-drift-topic: dti.twin-drift-events
+    transaction-dlt-topic: dti.transaction-events.dlt
+    decision-dlt-topic: dti.fraud-decisions.dlt
+    consumer-retry-attempts: 1
+    consumer-retry-interval-ms: 100
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  tracing:
+    sampling:
+      probability: 0.0
+app:
+  security:
+    enabled: false
+    jwt-secret: integration-test-secret-change-me-min-32-chars

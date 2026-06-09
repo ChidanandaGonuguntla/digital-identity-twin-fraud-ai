@@ -1,0 +1,53 @@
+groups:
+  - name: fraud_slo_recording
+    interval: 30s
+    rules:
+      - record: slo:fraud_decision_latency_p50:5m
+        expr: histogram_quantile(0.50, sum(rate(fraud_decision_latency_ms_bucket[5m])) by (le))
+
+      - record: slo:fraud_decision_latency_p95:5m
+        expr: histogram_quantile(0.95, sum(rate(fraud_decision_latency_ms_bucket[5m])) by (le))
+
+      - record: slo:fraud_decision_latency_p99:5m
+        expr: histogram_quantile(0.99, sum(rate(fraud_decision_latency_ms_bucket[5m])) by (le))
+
+      - record: slo:fraud_decision_throughput:1m
+        expr: sum(rate(fraud_decisions_total[1m]))
+
+      - record: slo:fraud_block_rate:5m
+        expr: |
+          sum(rate(fraud_decisions_blocked_total[5m]))
+          /
+          clamp_min(sum(rate(fraud_decisions_total[5m])), 0.001)
+
+      - record: slo:fraud_challenge_rate:5m
+        expr: |
+          sum(rate(fraud_decisions_challenged_total[5m]))
+          /
+          clamp_min(sum(rate(fraud_decisions_total[5m])), 0.001)
+
+      - record: slo:fraud_api_availability:5m
+        expr: |
+          sum(rate(http_server_requests_seconds_count{uri=~"/api/v1/.*",status!~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(http_server_requests_seconds_count{uri=~"/api/v1/.*"}[5m])), 0.001)
+
+      - record: slo:fraud_service_up:1m
+        expr: max(up{job="digital-twin-fraud-backend"})
+
+      - record: slo:fraud_kafka_lag:1m
+        expr: max(kafka_consumer_lag)
+
+      - record: slo:fraud_model_drift:1m
+        expr: max(fraud_model_drift_score)
+
+      - record: slo:fraud_model_drift_alert:1m
+        expr: max(fraud_model_drift_alert)
+
+      - record: slo:fraud_error_budget_burn:5m
+        expr: |
+          1 - (
+            sum(rate(http_server_requests_seconds_count{uri=~"/api/v1/fraud/.*",status!~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(http_server_requests_seconds_count{uri=~"/api/v1/fraud/.*"}[5m])), 0.001)
+          )

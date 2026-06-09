@@ -1,0 +1,6 @@
+apiVersion: v2
+name: digital-twin-fraud
+description: Digital Twin fraud detection platform
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

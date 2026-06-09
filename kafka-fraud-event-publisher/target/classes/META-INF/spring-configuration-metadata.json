@@ -1,0 +1,40 @@
+{
+  "groups": [
+    {
+      "name": "publisher",
+      "type": "com.citizens.digital.twin.publisher.PublisherProperties",
+      "sourceType": "com.citizens.digital.twin.publisher.PublisherProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "publisher.dataset-path",
+      "type": "java.lang.String",
+      "sourceType": "com.citizens.digital.twin.publisher.PublisherProperties"
+    },
+    {
+      "name": "publisher.max-records",
+      "type": "java.lang.Integer",
+      "sourceType": "com.citizens.digital.twin.publisher.PublisherProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "publisher.publish-on-startup",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.citizens.digital.twin.publisher.PublisherProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "publisher.publish-rate-per-second",
+      "type": "java.lang.Integer",
+      "sourceType": "com.citizens.digital.twin.publisher.PublisherProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "publisher.topic",
+      "type": "java.lang.String",
+      "sourceType": "com.citizens.digital.twin.publisher.PublisherProperties"
+    }
+  ],
+  "hints": []
+}

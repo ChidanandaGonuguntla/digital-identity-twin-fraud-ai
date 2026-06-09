@@ -1,0 +1,98 @@
+{
+  "uid": "dti-fraud-operations",
+  "title": "Fraud Operations",
+  "tags": ["digital-twin", "fraud", "operations"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Throughput / min",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "slo:fraud_decision_throughput:1m * 60", "legendFormat": "decisions/min" }],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Block rate",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "slo:fraud_block_rate:5m * 100", "legendFormat": "block %" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 15 }, { "color": "red", "value": 25 }] } } }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "p95 latency",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "slo:fraud_decision_latency_p95:5m", "legendFormat": "p95 ms" }],
+      "fieldConfig": { "defaults": { "unit": "ms", "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 200 }, { "color": "red", "value": 300 }] } } }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "API availability",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "slo:fraud_api_availability:5m * 100", "legendFormat": "availability %" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 3, "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 99.5 }, { "color": "green", "value": 99.9 }] } } }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Decision latency percentiles",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "slo:fraud_decision_latency_p50:5m", "legendFormat": "p50" },
+        { "expr": "slo:fraud_decision_latency_p95:5m", "legendFormat": "p95" },
+        { "expr": "slo:fraud_decision_latency_p99:5m", "legendFormat": "p99" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Decision mix",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "sum(rate(fraud_decisions_total{decision=\"ALLOW\"}[5m]))", "legendFormat": "ALLOW" },
+        { "expr": "sum(rate(fraud_decisions_total{decision=\"CHALLENGE\"}[5m]))", "legendFormat": "CHALLENGE" },
+        { "expr": "sum(rate(fraud_decisions_total{decision=\"BLOCK\"}[5m]))", "legendFormat": "BLOCK" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Blocked and challenged totals",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "fraud_decisions_blocked_total", "legendFormat": "blocked" },
+        { "expr": "fraud_decisions_challenged_total", "legendFormat": "challenged" },
+        { "expr": "step_up_challenge_pending_count", "legendFormat": "step-up pending" }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "HTTP error rate",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{uri=~\"/api/v1/.*\",status=~\"5..\"}[5m]))", "legendFormat": "5xx" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{uri=~\"/api/v1/.*\",status=~\"4..\"}[5m]))", "legendFormat": "4xx" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    }
+  ]
+}

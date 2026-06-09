@@ -1,0 +1,5 @@
+c:\digital-twin\digital-identity-twin-fraud-ai\kafka-fraud-event-publisher\src\main\java\com\citizens\digital\twin\publisher\config\JacksonConfig.java
+c:\digital-twin\digital-identity-twin-fraud-ai\kafka-fraud-event-publisher\src\main\java\com\citizens\digital\twin\publisher\KafkaFraudEventPublisherApplication.java
+c:\digital-twin\digital-identity-twin-fraud-ai\kafka-fraud-event-publisher\src\main\java\com\citizens\digital\twin\publisher\model\TransactionEvent.java
+c:\digital-twin\digital-identity-twin-fraud-ai\kafka-fraud-event-publisher\src\main\java\com\citizens\digital\twin\publisher\PublisherProperties.java
+c:\digital-twin\digital-identity-twin-fraud-ai\kafka-fraud-event-publisher\src\main\java\com\citizens\digital\twin\publisher\service\DatasetPublisherService.java

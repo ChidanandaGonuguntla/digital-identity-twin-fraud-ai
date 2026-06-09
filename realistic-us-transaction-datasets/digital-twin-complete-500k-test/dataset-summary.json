@@ -1,0 +1,23 @@
+{
+  "file": "test_500k_transactions_COMPLETE.jsonl.gz",
+  "rowsExpected": 500000,
+  "rowsWritten": 500000,
+  "sha256OfUncompressedJsonlContent": "9d510c714f4cd08bc848b1859373336b0a23a189f74d9385f74ed2465a1d1ee0",
+  "scenarioCounts": {
+    "ACCOUNT_TAKEOVER_PATTERN": 2486,
+    "CATEGORY_VELOCITY": 14999,
+    "HIGH_AMOUNT": 39486,
+    "HIGH_RISK_CATEGORY": 22430,
+    "IMPOSSIBLE_TRAVEL": 22703,
+    "ML_COMPOSITE_RISK": 19977,
+    "NEW_COUNTRY": 27611,
+    "NEW_DEVICE": 37909,
+    "NORMAL_BASELINE": 289900,
+    "UNUSUAL_HOUR": 22499
+  },
+  "fraudRows": 98107,
+  "fraudRate": 0.196214,
+  "createdAtUtc": "2026-06-09T02:29:08.369152+00:00",
+  "notice": "Privacy-safe USA-like synthetic test data. Not real bank/customer transaction data.",
+  "usage": "Use this only for validation/testing. Do not train on this file."
+}

@@ -1,0 +1,57 @@
+backend:
+  image:
+    repository: ghcr.io/citizens/digital-twin-fraud-backend
+    tag: "0.1.0"
+  env:
+    corsAllowedOrigins: "https://fraud.citizens.example.com"
+    securityEnabled: "true"
+
+monitoring:
+  otel:
+    tracesEndpoint: http://otel-collector.observability.svc:4318/v1/traces
+    metricsEndpoint: http://otel-collector.observability.svc:4318/v1/metrics
+    metricsExportEnabled: true
+    tracesSampleProbability: "0.1"
+
+frontend:
+  image:
+    repository: ghcr.io/citizens/digital-twin-fraud-frontend
+    tag: "0.1.0"
+
+postgresql:
+  host: digital-twin-db.prod.rds.amazonaws.com
+  username: fraud_app_prod
+
+kafka:
+  bootstrapServers: pkc-prod.us-east-1.aws.confluent.cloud:9092
+  securityProtocol: SASL_SSL
+  saslMechanism: PLAIN
+
+identity:
+  provider: okta
+  issuerUri: https://citizens.okta.com/oauth2/default
+  audience: api://digital-twin-fraud
+  jwksUri: https://citizens.okta.com/oauth2/default/v1/keys
+
+ingress:
+  enabled: true
+  hosts:
+    - host: fraud.citizens.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+        - path: /api
+          pathType: Prefix
+          service: backend
+        - path: /ws
+          pathType: Prefix
+          service: backend
+  tls:
+    - secretName: digital-twin-fraud-prod-tls
+      hosts:
+        - fraud.citizens.example.com
+
+secrets:
+  create: false
+  existingSecret: digital-twin-fraud-prod-secret

@@ -1,0 +1,38 @@
+[
+  {
+    "label": "normal-grocery",
+    "request": {
+      "customerId": "CUST-001",
+      "transactionId": "txn-normal",
+      "amount": 54,
+      "currency": "USD",
+      "merchantCategory": "GROCERY",
+      "merchantName": "Local Market",
+      "deviceId": "dev-A",
+      "channel": "MOBILE",
+      "latitude": 35.2271,
+      "longitude": -80.8431,
+      "countryCode": "US",
+      "city": "Charlotte",
+      "timestamp": "2026-05-07T14:00:00Z"
+    }
+  },
+  {
+    "label": "fraud-impossible-travel",
+    "request": {
+      "customerId": "CUST-001",
+      "transactionId": "txn-fraud",
+      "amount": 1450,
+      "currency": "USD",
+      "merchantCategory": "ELECTRONICS",
+      "merchantName": "Tech Store",
+      "deviceId": "dev-UNKNOWN",
+      "channel": "MOBILE",
+      "latitude": 1.3521,
+      "longitude": 103.8198,
+      "countryCode": "SG",
+      "city": "Singapore",
+      "timestamp": "2026-05-07T14:20:00Z"
+    }
+  }
+]

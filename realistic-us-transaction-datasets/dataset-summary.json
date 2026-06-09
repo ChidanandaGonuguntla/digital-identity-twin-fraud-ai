@@ -1,0 +1,21 @@
+{
+  "file": "train_500k_transactions_COMPLETE.jsonl.gz",
+  "rowsExpected": 500000,
+  "rowsWritten": 500000,
+  "sha256OfUncompressedJsonlContent": "31228b7dd6823bac1b220d10f4855646ab95754e3f1e8e42cf6a625e9cad3c0a",
+  "scenarioCounts": {
+    "CATEGORY_VELOCITY": 12498,
+    "HIGH_AMOUNT": 39984,
+    "HIGH_RISK_CATEGORY": 19876,
+    "IMPOSSIBLE_TRAVEL": 20003,
+    "ML_COMPOSITE_RISK": 17733,
+    "NEW_COUNTRY": 22661,
+    "NEW_DEVICE": 34993,
+    "NORMAL_BASELINE": 309507,
+    "UNUSUAL_HOUR": 22745
+  },
+  "fraudRows": 80046,
+  "fraudRate": 0.160092,
+  "createdAtUtc": "2026-06-09T02:19:04.951756+00:00",
+  "notice": "Privacy-safe USA-like synthetic data. Not real bank/customer transaction data."
+}

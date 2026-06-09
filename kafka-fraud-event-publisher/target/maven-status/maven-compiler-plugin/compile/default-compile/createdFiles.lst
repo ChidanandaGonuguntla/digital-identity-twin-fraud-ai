@@ -1,0 +1,6 @@
+com\citizens\digital\twin\publisher\PublisherProperties.class
+com\citizens\digital\twin\publisher\KafkaFraudEventPublisherApplication.class
+com\citizens\digital\twin\publisher\model\TransactionEvent.class
+com\citizens\digital\twin\publisher\config\JacksonConfig.class
+META-INF\spring-configuration-metadata.json
+com\citizens\digital\twin\publisher\service\DatasetPublisherService.class

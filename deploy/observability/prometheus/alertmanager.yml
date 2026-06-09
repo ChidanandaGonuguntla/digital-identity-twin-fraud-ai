@@ -1,0 +1,21 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: fraud-platform-default
+  group_by: ['alertname', 'slo', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - matchers:
+        - severity = critical
+      receiver: fraud-platform-critical
+    - matchers:
+        - slo =~ "model_drift.*"
+      receiver: model-risk
+
+receivers:
+  - name: fraud-platform-default
+  - name: fraud-platform-critical
+  - name: model-risk
