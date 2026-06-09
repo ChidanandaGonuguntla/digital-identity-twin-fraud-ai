@@ -82,6 +82,8 @@ dti:
     drift-baseline-score: 0.15
     drift-alert-threshold: 0.35
 app:
+  flyway:
+    repair-on-startup: ${APP_FLYWAY_REPAIR:false}
   identity:
     provider: ${IDENTITY_PROVIDER:local}
     issuer-uri: ${IDENTITY_ISSUER_URI:}
